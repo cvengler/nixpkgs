@@ -1,0 +1,46 @@
+diff --git a/src/main/utility/mod.rs b/src/main/utility/mod.rs
+index ad7709b12..8a2ea7ef1 100644
+--- a/src/main/utility/mod.rs
++++ b/src/main/utility/mod.rs
+@@ -470,6 +470,8 @@ fn get_interpreter(header: &[u8]) -> Option<&Path> {
+ fn is_dynamic_bin(path: impl AsRef<std::path::Path>) -> bool {
+     let path = path.as_ref();
+ 
++    return true;
++
+     // check if the binary is dynamically linked
+     let ld_path = "/lib64/ld-linux-x86-64.so.2";
+     let ld_output = std::process::Command::new(ld_path)
+diff --git a/src/test/clone/test_fork.rs b/src/test/clone/test_fork.rs
+index 405e3e1b0..e94aff042 100644
+--- a/src/test/clone/test_fork.rs
++++ b/src/test/clone/test_fork.rs
+@@ -1306,7 +1306,7 @@ fn test_clone_clear_sighand(set_clear_sighand: bool) -> anyhow::Result<()> {
+ 
+ fn main() -> Result<(), Box<dyn Error>> {
+     // FIXME: take as a command-line arg
+-    let python_path = Path::new("/usr/bin/python3");
++    let python_path = Path::new(env!("PYTHON3_BIN"));
+ 
+     // should we restrict the tests we run?
+     let filter_shadow_passing = std::env::args().any(|x| x == "--shadow-passing");
+diff --git a/src/test/examples/bash/bash-example.yaml b/src/test/examples/bash/bash-example.yaml
+index 7f89ddd51..144f7e864 100644
+--- a/src/test/examples/bash/bash-example.yaml
++++ b/src/test/examples/bash/bash-example.yaml
+@@ -12,7 +12,7 @@ hosts:
+   host:
+     network_node_id: 0
+     processes:
+-    - path: bash 
++    - path: bash
+       args:
+        - -c
+        - |
+@@ -42,4 +42,4 @@ hosts:
+          seq 5 | tac
+ 
+          echo done
+-      start_time: 3s
+\ No newline at end of file
++      start_time: 3s

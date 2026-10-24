@@ -15,6 +15,8 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-kgWvrnpWUJ5OWy2+luju8SHDRcveVbdfCKntDgxVj0o=";
   };
 
+  patches = [ ./shadow-nix.patch ];
+
   nativeBuildInputs = with pkgs; [
     cargo
     cmake
@@ -39,9 +41,26 @@ stdenv.mkDerivation (finalAttrs: {
 
   buildPhase = ''
     runHook preBuild
+    ls -la /
+    false
+    export PYTHON3_BIN="${pkgs.python314}/bin/python3.14"
     patchShebangs setup
-    ./setup build --jobs $NIX_BUILD_CORES --prefix $out
+    ./setup build --test --jobs $NIX_BUILD_CORES --prefix $out
     runHook postBuild
+  '';
+
+  doCheck = true;
+  nativeCheckInputs = with pkgs; [
+    bash # bash-example-shadow
+    util-linux # lscpu
+  ];
+  checkInputs = with pkgs; [
+    iana-etc # /etc/services
+  ];
+  checkPhase = ''
+    runHook preCheck
+    ./setup test --jobs $NIX_BUILD_CORES --verbose
+    runHook postCheck
   '';
 
   installPhase = ''
