@@ -1,7 +1,12 @@
 {
   autoreconfHook,
+  coreutils,
+  diffutils,
   fetchFromGitHub,
+  gzip,
   lib,
+  makeWrapper,
+  ncurses,
   nix-update-script,
   stdenv,
 }:
@@ -17,11 +22,30 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-uRuCDzIDO/+GhEufPP1TGhhbZ29PJ/KrZGGuIfc7B0Q=";
   };
 
-  nativeBuildInputs = [ autoreconfHook ];
+  nativeBuildInputs = [
+    autoreconfHook
+    makeWrapper
+  ];
+  buildInputs = [ ncurses ];
   enableParallelBuilding = true;
 
   __structuredAttrs = true;
   strictDeps = true;
+
+  postPatch = ''
+    substituteInPlace src/buffer.c \
+      --replace-fail '"/usr/bin/diff"' '"${lib.getExe' diffutils "diff"}"'
+  '';
+
+  postInstall = ''
+    wrapProgram $out/bin/mg \
+      --prefix PATH : ${
+        lib.makeBinPath [
+          coreutils
+          gzip
+        ]
+      }
+  '';
 
   passthru.updateScript = nix-update-script { };
 
